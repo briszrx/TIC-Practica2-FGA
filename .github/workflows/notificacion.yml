@@ -1,0 +1,36 @@
+name: Notificación por correo al hacer push
+
+on:
+  push:
+    branches:
+      - main
+      - feature_a
+      - feature_b
+
+jobs:
+  enviar-notificacion:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout del código
+        uses: actions/checkout@v4
+
+      - name: Enviar correo de notificación
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: smtp.gmail.com
+          server_port: 465
+          secure: true
+          username: ${{ secrets.MAIL_USERNAME }}
+          password: ${{ secrets.MAIL_PASSWORD }}
+          to: ${{ secrets.MAIL_TO }}
+          from: Notificaciones GitHub <${{ secrets.MAIL_USERNAME }}>
+          subject: "Cambios subidos a rama ${{ github.ref_name }}"
+          body: |
+            Se detectó un nuevo push en el repositorio en repositorio ${{ github.repository }} en la rama ${{ github.ref_name }}.
+            Detalles del commit:
+
+            - Repositorio: ${{ github.repository }}
+            - Rama: ${{ github.ref_name }}
+            - Autor: ${{ github.actor }}
+            - Commit: ${{ github.sha }}
+            - Mensaje del commit: ${{ github.event.head_commit.message }}
